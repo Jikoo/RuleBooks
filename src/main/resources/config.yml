@@ -1,0 +1,4 @@
+block-selling-rules: true
+give-rules-on-join: true
+give-delay-seconds: 5
+keep-rules-on-death: true
