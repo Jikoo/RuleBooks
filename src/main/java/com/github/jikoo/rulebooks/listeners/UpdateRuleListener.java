@@ -48,6 +48,11 @@ public class UpdateRuleListener implements Listener {
 			return;
 		}
 
+		// Only overwrite on signing to make it easier to do larger-scale WIP changes.
+		if (!event.isSigning()) {
+			return;
+		}
+
 		// Preserve old author
 		if (event.getPreviousBookMeta().getAuthor() != null) {
 			event.getNewBookMeta().setAuthor(event.getPreviousBookMeta().getAuthor());
@@ -88,20 +93,24 @@ public class UpdateRuleListener implements Listener {
 			return;
 		}
 
-		if (rule.checkPermission(event.getPlayer())) {
-			if (event.getItem().getType() == Material.WRITABLE_BOOK) {
-				// User is modifying existing rule.
-				return;
-			}
-			ItemStack ruleItem = rule.getItem();
-			if (!ruleItem.isSimilar(event.getItem())) {
-				// Rule is not up to date.
-				event.getPlayer().getInventory().setItem(Objects.requireNonNull(event.getHand()), ruleItem);
-			}
-		} else {
+		if (!rule.checkPermission(event.getPlayer())) {
 			// User does not have permission to access rule.
 			event.getPlayer().getInventory().setItem(Objects.requireNonNull(event.getHand()), null);
+			return;
 		}
+
+		if (event.getItem().getType() == Material.WRITABLE_BOOK) {
+			// User is modifying existing rule.
+			return;
+		}
+
+		ItemStack ruleItem = rule.getItem();
+
+		if (!ruleItem.isSimilar(event.getItem())) {
+			// Rule is not up to date.
+			event.getPlayer().getInventory().setItem(Objects.requireNonNull(event.getHand()), ruleItem);
+		}
+
 	}
 
 }
