@@ -12,6 +12,8 @@ import com.github.jikoo.rulebooks.RuleBooks;
 import com.github.jikoo.rulebooks.data.Data;
 import com.github.jikoo.rulebooks.data.RuleData;
 import com.github.jikoo.rulebooks.util.ItemUtil;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
@@ -51,6 +53,36 @@ public class GetRules extends BaseCommand {
 		ItemUtil.giveSafe(target, ruleData.getItem());
 		target.sendMessage("You were given a copy of " + ruleData.getPrettyID() + "!");
 		sender.sendMessage("Gave " + target.getName() + " a copy of " + ruleData.getPrettyID() + "!");
+	}
+
+	@Subcommand("get")
+	@CommandCompletion("")
+	@Description("Get a rule in item form.")
+	public void get(@Conditions("player") CommandSender sender) {
+		Player player = (Player) sender;
+
+		Set<RuleData> rules = plugin.getRules().stream().filter(ruleData -> ruleData.isBulkGive() && ruleData.checkPermission(player)).collect(Collectors.toSet());
+
+		if (rules.isEmpty()) {
+			sender.sendMessage("No rules are defined!");
+			return;
+		}
+
+		StringBuilder given = new StringBuilder("Obtained copies of ");
+		Iterator<RuleData> iterator = rules.iterator();
+		RuleData ruleData;
+		while (iterator.hasNext()) {
+			ruleData = iterator.next();
+			if (!iterator.hasNext()) {
+				given.append("and ");
+			}
+			ItemUtil.giveSafe(player, ruleData.getItem());
+			if (iterator.hasNext()) {
+				given.append(", ");
+			}
+		}
+
+		player.sendMessage(given.toString());
 	}
 
 	@Subcommand("get")
