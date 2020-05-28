@@ -37,8 +37,9 @@ public class JoinRulesListener implements Listener {
 				if (!rule.isBulkGive() || receivedRules.contains(rule.getID())) {
 					continue;
 				}
-				ItemUtil.giveSafe(player, rule);
-				playerData.markRuleReceived(rule.getID(), true);
+				if (ItemUtil.giveSafe(player, rule)) {
+					playerData.markRuleReceived(rule.getID(), true);
+				}
 			}
 			for (String ruleName : receivedRules) {
 				RuleData ruleData = plugin.getRule(ruleName);
