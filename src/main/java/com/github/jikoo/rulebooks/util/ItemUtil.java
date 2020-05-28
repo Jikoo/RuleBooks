@@ -1,5 +1,6 @@
 package com.github.jikoo.rulebooks.util;
 
+import com.github.jikoo.rulebooks.data.RuleData;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.NamespacedKey;
@@ -49,6 +50,22 @@ public final class ItemUtil {
 		}
 		itemMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, id);
 		itemStack.setItemMeta(itemMeta);
+	}
+
+	public static boolean giveSafe(@NotNull Player player, @NotNull RuleData ruleData) {
+		// Remove existing copies
+		for (ItemStack itemStack : player.getInventory().getContents()) {
+			String ruleID = ItemUtil.getRuleID(itemStack);
+			if (ruleData.getID().equals(ruleID)) {
+				player.getInventory().remove(itemStack);
+			}
+		}
+
+		if (ruleData.checkPermission(player)) {
+			giveSafe(player, ruleData.getItem());
+			return true;
+		}
+		return false;
 	}
 
 	public static void giveSafe(@NotNull Player player, @Nullable ItemStack itemStack) {

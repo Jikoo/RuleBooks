@@ -106,7 +106,7 @@ public class RuleBooks extends JavaPlugin {
 			getServer().getPluginManager().registerEvents(new JoinRulesListener(this), this);
 		}
 		if (config.keepRulesOnDeath()) {
-			getServer().getPluginManager().registerEvents(new KeepRulesListener(), this);
+			getServer().getPluginManager().registerEvents(new KeepRulesListener(this), this);
 		}
 		if (config.blockSellingRules()) {
 			getServer().getPluginManager().registerEvents(new RuleSellListener(), this);

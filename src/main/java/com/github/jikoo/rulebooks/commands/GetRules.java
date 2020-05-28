@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Commands for giving rules to players.
@@ -37,22 +36,12 @@ public class GetRules extends BaseCommand {
 	@Description("Get a rule in item form.")
 	@CommandPermission("rulebooks.give")
 	public void give(CommandSender sender, RuleData ruleData, Player target) {
-		if (!ruleData.checkPermission(target)) {
+		if (ItemUtil.giveSafe(target, ruleData)) {
+			target.sendMessage("You were given a copy of " + ruleData.getPrettyID() + "!");
+			sender.sendMessage("Gave " + target.getName() + " a copy of " + ruleData.getPrettyID() + "!");
+		} else {
 			sender.sendMessage("Target does not have access to this rule.");
-			return;
 		}
-
-		// Remove existing copies
-		for (ItemStack itemStack : target.getInventory().getContents()) {
-			String ruleID = ItemUtil.getRuleID(itemStack);
-			if (ruleData.getID().equals(ruleID)) {
-				target.getInventory().remove(itemStack);
-			}
-		}
-
-		ItemUtil.giveSafe(target, ruleData.getItem());
-		target.sendMessage("You were given a copy of " + ruleData.getPrettyID() + "!");
-		sender.sendMessage("Gave " + target.getName() + " a copy of " + ruleData.getPrettyID() + "!");
 	}
 
 	@Subcommand("get")
@@ -61,7 +50,7 @@ public class GetRules extends BaseCommand {
 	public void get(@Conditions("player") CommandSender sender) {
 		Player player = (Player) sender;
 
-		Set<RuleData> rules = plugin.getRules().stream().filter(ruleData -> ruleData.isBulkGive() && ruleData.checkPermission(player)).collect(Collectors.toSet());
+		Set<RuleData> rules = plugin.getRules().stream().filter(RuleData::isBulkGive).collect(Collectors.toSet());
 
 		if (rules.isEmpty()) {
 			sender.sendMessage("No rules are defined!");
@@ -73,12 +62,14 @@ public class GetRules extends BaseCommand {
 		RuleData ruleData;
 		while (iterator.hasNext()) {
 			ruleData = iterator.next();
-			if (!iterator.hasNext()) {
-				given.append("and ");
+			// Remove illegal items just in case.
+			if (!ItemUtil.giveSafe(player, ruleData)) {
+				continue;
 			}
-			ItemUtil.giveSafe(player, ruleData.getItem());
-			if (iterator.hasNext()) {
-				given.append(", ");
+			if (!iterator.hasNext()) {
+				given.append("and ").append(ruleData.getPrettyID());
+			} else {
+				given.append(ruleData.getPrettyID()).append(", ");
 			}
 		}
 
@@ -89,22 +80,11 @@ public class GetRules extends BaseCommand {
 	@CommandCompletion("@rules")
 	@Description("Get a rule in item form.")
 	public void get(@Conditions("player") CommandSender sender, RuleData ruleData) {
-		Player player = (Player) sender;
-		if (!ruleData.checkPermission(player)) {
-			player.sendMessage("You do not have access to this rule.");
-			return;
+		if (ItemUtil.giveSafe((Player) sender, ruleData)) {
+			sender.sendMessage("Obtained a copy of " + ruleData.getPrettyID() + "!");
+		} else {
+			sender.sendMessage("You do not have access to this rule.");
 		}
-
-		// Remove existing copies
-		for (ItemStack itemStack : player.getInventory().getContents()) {
-			String ruleID = ItemUtil.getRuleID(itemStack);
-			if (ruleData.getID().equals(ruleID)) {
-				player.getInventory().remove(itemStack);
-			}
-		}
-
-		ItemUtil.giveSafe(player, ruleData.getItem());
-		player.sendMessage("Obtained a copy of " + ruleData.getPrettyID() + "!");
 	}
 
 	@Subcommand("list")

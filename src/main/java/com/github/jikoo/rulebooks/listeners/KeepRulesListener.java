@@ -1,5 +1,7 @@
 package com.github.jikoo.rulebooks.listeners;
 
+import com.github.jikoo.rulebooks.RuleBooks;
+import com.github.jikoo.rulebooks.data.RuleData;
 import com.github.jikoo.rulebooks.util.ItemUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Listener for keeping rule items on death.
@@ -19,18 +20,27 @@ import org.bukkit.inventory.ItemStack;
  */
 public class KeepRulesListener implements Listener {
 
-	private final Map<UUID, List<ItemStack>> rulesOnRespawn = new HashMap<>();
+	private final Map<UUID, List<RuleData>> rulesOnRespawn = new HashMap<>();
+	private final RuleBooks plugin;
+
+	public KeepRulesListener(RuleBooks plugin) {
+		this.plugin = plugin;
+	}
 
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
 		if (!event.getKeepInventory()) {
-			List<ItemStack> rules = new ArrayList<>();
+			List<RuleData> rules = new ArrayList<>();
 			event.getDrops().removeIf(itemStack -> {
-				if (ItemUtil.isTagged(itemStack)) {
-					rules.add(itemStack);
-					return true;
+				String ruleID = ItemUtil.getRuleID(itemStack);
+				if (ruleID == null) {
+					return false;
 				}
-				return false;
+				RuleData ruleData = plugin.getRule(ruleID);
+				if (ruleData != null) {
+					rules.add(ruleData);
+				}
+				return true;
 			});
 
 			if (rules.isEmpty()) {
@@ -43,9 +53,9 @@ public class KeepRulesListener implements Listener {
 
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		List<ItemStack> rules = rulesOnRespawn.remove(event.getPlayer().getUniqueId());
+		List<RuleData> rules = rulesOnRespawn.remove(event.getPlayer().getUniqueId());
 		if (rules != null) {
-			rules.forEach(rule -> ItemUtil.giveSafe(event.getPlayer(), rule));
+			rules.forEach(ruleData -> ItemUtil.giveSafe(event.getPlayer(), ruleData));
 		}
 	}
 
