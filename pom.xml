@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>RuleBooks</name>
-    <groupId>com.github.jikoo.rulebooks</groupId>
+    <groupId>com.github.jikoo</groupId>
     <artifactId>rulebooks</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
