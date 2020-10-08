@@ -1,7 +1,7 @@
 name: "${project.name}"
 main: "${project.groupId}.${project.name}"
 version: "${project.version}"
-api-version: "1.16"
+api-version: "1.14"
 author: Jikoo
 description: Distribute rules and guides in item form to players.
 

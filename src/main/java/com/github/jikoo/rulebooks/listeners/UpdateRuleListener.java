@@ -4,7 +4,6 @@ import com.github.jikoo.rulebooks.RuleBooks;
 import com.github.jikoo.rulebooks.data.RuleData;
 import com.github.jikoo.rulebooks.util.ItemUtil;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -95,7 +94,7 @@ public class UpdateRuleListener implements Listener {
 
 		if (!rule.checkPermission(event.getPlayer())) {
 			// User does not have permission to access rule.
-			event.getPlayer().getInventory().setItem(Objects.requireNonNull(event.getHand()), null);
+			ItemUtil.getSlotSetter(event.getHand()).accept(event.getPlayer().getInventory(), null);
 			return;
 		}
 
@@ -108,7 +107,7 @@ public class UpdateRuleListener implements Listener {
 
 		if (!ruleItem.isSimilar(event.getItem())) {
 			// Rule is not up to date.
-			event.getPlayer().getInventory().setItem(Objects.requireNonNull(event.getHand()), ruleItem);
+			ItemUtil.getSlotSetter(event.getHand()).accept(event.getPlayer().getInventory(), ruleItem);
 		}
 
 	}

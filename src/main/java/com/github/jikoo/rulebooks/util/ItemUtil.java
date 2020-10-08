@@ -3,9 +3,12 @@ package com.github.jikoo.rulebooks.util;
 import com.github.jikoo.rulebooks.data.RuleData;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -77,6 +80,25 @@ public final class ItemUtil {
 		// Drop anything that didn't fit at player's location
 		for (Map.Entry<Integer, ItemStack> entry : leftovers.entrySet()) {
 			player.getWorld().dropItem(player.getLocation(), entry.getValue()).setPickupDelay(0);
+		}
+	}
+
+	public static BiConsumer<PlayerInventory, ItemStack> getSlotSetter(EquipmentSlot slot) {
+		switch (slot) {
+			case HAND:
+				return PlayerInventory::setItemInMainHand;
+			case OFF_HAND:
+				return PlayerInventory::setItemInOffHand;
+			case FEET:
+				return PlayerInventory::setBoots;
+			case LEGS:
+				return PlayerInventory::setLeggings;
+			case CHEST:
+				return PlayerInventory::setChestplate;
+			case HEAD:
+				return PlayerInventory::setHelmet;
+			default:
+				throw new IllegalArgumentException(String.format("Unsupported EquipmentSlot %s", slot));
 		}
 	}
 
